@@ -1,0 +1,35 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Маркетплейс</title>
+    <script src="https://telegram.org/js/telegram-web-app.js"></script>
+    <style>
+        body {
+            font-family: sans-serif;
+            background-color: var(--tg-theme-bg-color, #fff);
+            color: var(--tg-theme-text-color, #000);
+            padding: 20px;
+            text-align: center;
+        }
+        .card {
+            border: 1px solid #ccc;
+            border-radius: 8px;
+            padding: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+    <h2>🚀 Маркетплейс объявлений</h2>
+    <p>Добро пожаловать!</p>
+    <div class="card">
+        <h3>Здесь будут товары</h3>
+        <p>ИИ активно собирает и публикует объявления.</p>
+    </div>
+    <script>
+        window.Telegram.WebApp.ready();
+    </script>
+</body>
+</html>
