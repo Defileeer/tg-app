@@ -1,7 +1,7 @@
 const tg = window.Telegram.WebApp;
 tg.expand(); // Разворачиваем окно на весь экран
 
-// Укажи здесь базовый URL твоего FastAPI бэкенда (например: https://your-domain.com или через свой сервер)
+// Твой актуальный URL ngrok
 const API_URL = "https://clapped-simmering-outlet.ngrok-free.dev";
 
 async function fetchListings() {
@@ -9,10 +9,23 @@ async function fetchListings() {
     const loading = document.getElementById('loading');
 
     try {
-        const response = await fetch(`${API_URL}/api/listings`);
+        // Запрос с заголовком ngrok-skip-browser-warning, чтобы ngrok не выдавал стартовый экран
+        const response = await fetch(`${API_URL}/api/listings`, {
+            headers: {
+                'ngrok-skip-browser-warning': 'true',
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка сервера: ${response.status}`);
+        }
+
         const data = await response.json();
 
-        loading.style.display = 'none';
+        if (loading) {
+            loading.style.display = 'none';
+        }
 
         if (!data || data.length === 0) {
             container.innerHTML = '<div class="empty-msg">Пока нет опубликованных объявлений 😔</div>';
@@ -36,7 +49,7 @@ async function fetchListings() {
             card.innerHTML = `
                 ${photoHtml}
                 <div class="card-content">
-                    <div class="card-price">${item.price} ${item.currency}</div>
+                    <div class="card-price">${item.price} ${item.currency || '$'}</div>
                     <div class="card-title">${item.title}</div>
                     <div class="card-location">📍 ${item.location || 'ПМР'}</div>
                     <button class="btn-contact" onclick="contactSeller('${item.user_id}', event)">Связаться</button>
@@ -48,7 +61,9 @@ async function fetchListings() {
 
     } catch (error) {
         console.error('Ошибка загрузки:', error);
-        loading.innerText = '⚠️ Не удалось загрузить объявления';
+        if (loading) {
+            loading.innerText = '⚠️ Не удалось загрузить объявления';
+        }
     }
 }
 
