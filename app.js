@@ -1,7 +1,7 @@
 const tg = window.Telegram.WebApp;
 tg.expand(); // Разворачиваем окно на весь экран
 
-// Твой актуальный URL ngrok
+// Актуальный URL бэкенда на Render
 const API_URL = "https://tg-marketplace-backend.onrender.com";
 
 async function fetchListings() {
@@ -9,10 +9,8 @@ async function fetchListings() {
     const loading = document.getElementById('loading');
 
     try {
-        // Запрос с заголовком ngrok-skip-browser-warning, чтобы ngrok не выдавал стартовый экран
         const response = await fetch(`${API_URL}/api/listings`, {
             headers: {
-                'ngrok-skip-browser-warning': 'true',
                 'Content-Type': 'application/json'
             }
         });
