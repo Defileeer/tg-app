@@ -2,7 +2,7 @@ const tg = window.Telegram.WebApp;
 tg.expand(); // Разворачиваем окно на весь экран
 
 // Укажи здесь базовый URL твоего FastAPI бэкенда (например: https://your-domain.com или через свой сервер)
-const API_URL = "http://127.0.0.1:8000";
+const API_URL = "https://clapped-simmering-outlet.ngrok-free.dev";
 
 async function fetchListings() {
     const container = document.getElementById('listings');
