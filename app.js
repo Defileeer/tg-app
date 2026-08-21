@@ -2,7 +2,7 @@ const tg = window.Telegram.WebApp;
 tg.expand(); // Разворачиваем окно на весь экран
 
 // Твой актуальный URL ngrok
-const API_URL = "https://clapped-simmering-outlet.ngrok-free.dev";
+const API_URL = "https://tg-marketplace-backend.onrender.com";
 
 async function fetchListings() {
     const container = document.getElementById('listings');
