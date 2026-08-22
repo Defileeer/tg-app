@@ -20,11 +20,7 @@ async function fetchListings() {
 
     try {
         console.log(`📡 Отправка запроса на: ${API_URL}/api/listings`);
-        const response = await fetch(`${API_URL}/api/listings`, {
-            headers: {
-                'Content-Type': 'application/json'
-            }
-        });
+        const response = await fetch(`${API_URL}/api/listings`);
 
         if (!response.ok) {
             throw new Error(`Ошибка сервера: ${response.status}`);
@@ -48,20 +44,24 @@ async function fetchListings() {
             const card = document.createElement('div');
             card.className = 'card';
 
-            const photoUrl = item.photo_id 
-                ? `${API_URL}/api/photo/${item.photo_id}` 
-                : null;
+            // Если есть photo_id, рисуем картинку, иначе заглушку
+            let photoHtml = `<div class="card-img no-photo">📷 Без фото</div>`;
+            if (item.photo_id) {
+                const photoUrl = `${API_URL}/api/photo/${item.photo_id}`;
+                photoHtml = `<img src="${photoUrl}" class="card-img" alt="Фото товара">`;
+            }
 
-            const photoHtml = photoUrl
-                ? `<img src="${photoUrl}" class="card-img" alt="Фото товара">`
-                : `<div class="card-img no-photo">📷 Без фото</div>`;
+            const price = item.price ? item.price : 'Договорная';
+            const currency = item.currency || '$';
+            const title = item.title || 'Без названия';
+            const location = item.location || 'ПМР';
 
             card.innerHTML = `
                 ${photoHtml}
                 <div class="card-content">
-                    <div class="card-price">${item.price} ${item.currency || '$'}</div>
-                    <div class="card-title">${item.title}</div>
-                    <div class="card-location">📍 ${item.location || 'ПМР'}</div>
+                    <div class="card-price">${price} ${currency}</div>
+                    <div class="card-title">${title}</div>
+                    <div class="card-location">📍 ${location}</div>
                     <button class="btn-contact" onclick="contactSeller('${item.user_id}', event)">Связаться</button>
                 </div>
             `;
