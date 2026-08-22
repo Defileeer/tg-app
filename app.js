@@ -26,7 +26,6 @@ async function fetchListings() {
             }
         });
 
-        console.f
         if (!response.ok) {
             throw new Error(`Ошибка сервера: ${response.status}`);
         }
@@ -54,7 +53,7 @@ async function fetchListings() {
                 : null;
 
             const photoHtml = photoUrl
-                ? `<img src="${photoUrl}" class="card-img" alt="${item.title}">`
+                ? `<img src="${photoUrl}" class="card-img" alt="Фото товара">`
                 : `<div class="card-img no-photo">📷 Без фото</div>`;
 
             card.innerHTML = `
