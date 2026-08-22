@@ -1,5 +1,14 @@
-const tg = window.Telegram.WebApp;
-tg.expand(); // Разворачиваем окно на весь экран
+// Безопасная инициализация Telegram WebApp
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : {
+    expand: () => {},
+    openTelegramLink: (url) => { window.open(url, '_blank'); }
+};
+
+try {
+    tg.expand();
+} catch (e) {
+    console.log("WebApp expand not supported here");
+}
 
 // Актуальный URL бэкенда на Render
 const API_URL = "https://tg-marketplace-backend.onrender.com";
