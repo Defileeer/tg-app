@@ -1,143 +1,89 @@
-<!DOCTYPE html>
-<html lang="ru">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>Доска объявлений ПМР</title>
-    <style>
-        :root {
-            --bg-color: var(--tg-theme-bg-color, #f4f4f5);
-            --card-bg: var(--tg-theme-secondary-bg-color, #ffffff);
-            --text-color: var(--tg-theme-text-color, #1c1c1e);
-            --hint-color: var(--tg-theme-hint-color, #8e8e93);
-            --link-color: var(--tg-theme-link-color, #007aff);
-            --button-bg: var(--tg-theme-button-color, #007aff);
-            --button-text: var(--tg-theme-button-text-color, #ffffff);
+// Безопасная инициализация Telegram WebApp
+const tg = window.Telegram && window.Telegram.WebApp ? window.Telegram.WebApp : {
+    expand: () => {},
+    openTelegramLink: (url) => { window.open(url, '_blank'); }
+};
+
+try {
+    tg.expand();
+} catch (e) {
+    console.log("WebApp expand not supported here:", e);
+}
+
+// Актуальный URL бэкенда на Render
+const API_URL = "https://tg-marketplace-backend.onrender.com";
+
+async function fetchListings() {
+    console.log("🚀 Запуск загрузки объявлений...");
+    const container = document.getElementById('listings');
+    const loading = document.getElementById('loading');
+
+    try {
+        console.log(`📡 Отправка запроса на: ${API_URL}/api/listings`);
+        const response = await fetch(`${API_URL}/api/listings`, {
+            headers: {
+                'Content-Type': 'application/json'
+            }
+        });
+
+        if (!response.ok) {
+            throw new Error(`Ошибка сервера: ${response.status}`);
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        const data = await response.json();
+        console.log("📦 Получены данные от сервера:", data);
+
+        if (loading) {
+            loading.style.display = 'none';
         }
 
-        body {
-            background-color: var(--bg-color);
-            color: var(--text-color);
-            padding: 12px;
-            padding-bottom: 30px;
+        if (!data || data.length === 0) {
+            container.innerHTML = '<div class="empty-msg">Пока нет опубликованных объявлений 😔</div>';
+            return;
         }
 
-        header {
-            margin-bottom: 16px;
-            text-align: center;
+        container.innerHTML = '';
+
+        data.forEach(item => {
+            const card = document.createElement('div');
+            card.className = 'card';
+
+            const photoUrl = item.photo_id 
+                ? `${API_URL}/api/photo/${item.photo_id}` 
+                : null;
+
+            const photoHtml = photoUrl
+                ? `<img src="${photoUrl}" class="card-img" alt="${item.title}">`
+                : `<div class="card-img no-photo">📷 Без фото</div>`;
+
+            card.innerHTML = `
+                ${photoHtml}
+                <div class="card-content">
+                    <div class="card-price">${item.price} ${item.currency || '$'}</div>
+                    <div class="card-title">${item.title}</div>
+                    <div class="card-location">📍 ${item.location || 'ПМР'}</div>
+                    <button class="btn-contact" onclick="contactSeller('${item.user_id}', event)">Связаться</button>
+                </div>
+            `;
+
+            container.appendChild(card);
+        });
+        console.log("✅ Карточки успешно отрисованы!");
+
+    } catch (error) {
+        console.error('❌ Ошибка загрузки:', error);
+        if (loading) {
+            loading.innerText = '⚠️ Не удалось загрузить объявления';
         }
+    }
+}
 
-        header h1 {
-            font-size: 20px;
-            font-weight: 700;
-        }
+function contactSeller(userId, event) {
+    if (event) {
+        event.stopPropagation();
+    }
+    tg.openTelegramLink(`https://t.me/user?id=${userId}`);
+}
 
-        .listings-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
-            gap: 12px;
-        }
-
-        .card {
-            background: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
-            display: flex;
-            flex-direction: column;
-            cursor: pointer;
-            transition: transform 0.1s ease;
-        }
-
-        .card:active {
-            transform: scale(0.98);
-        }
-
-        .card-img {
-            width: 100%;
-            height: 140px;
-            object-fit: cover;
-            background-color: #e5e5ea;
-        }
-
-        .no-photo {
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--hint-color);
-            font-size: 13px;
-            height: 140px;
-            background-color: #e5e5ea;
-        }
-
-        .card-content {
-            padding: 10px;
-            display: flex;
-            flex-direction: column;
-            flex-grow: 1;
-        }
-
-        .card-price {
-            font-size: 16px;
-            font-weight: 700;
-            color: #34c759;
-            margin-bottom: 4px;
-        }
-
-        .card-title {
-            font-size: 14px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            line-height: 1.2;
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .card-location {
-            font-size: 12px;
-            color: var(--hint-color);
-            margin-top: auto;
-        }
-
-        .loading, .empty-msg {
-            text-align: center;
-            padding: 40px 0;
-            color: var(--hint-color);
-            font-size: 15px;
-        }
-
-        .btn-contact {
-            margin-top: 8px;
-            width: 100%;
-            padding: 8px;
-            background-color: var(--button-bg);
-            color: var(--button-text);
-            border: none;
-            border-radius: 8px;
-            font-size: 13px;
-            font-weight: 600;
-            cursor: pointer;
-        }
-    </style>
-</head>
-<body>
-
-    <header>
-        <h1>🛍️ Доска объявлений</h1>
-    </header>
-
-    <div id="loading" class="loading">Загрузка объявлений...</div>
-    <div id="listings" class="listings-grid"></div>
-
-    <script src="app.js"></script>
-</body>
-</html>
+// Запускаем при загрузке документа
+document.addEventListener('DOMContentLoaded', fetchListings);
